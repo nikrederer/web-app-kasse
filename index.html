@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kassen-App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .product-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 8px 0;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .money-btn {
+            height: 80px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            flex-grow: 1;
+        }
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .cart-display {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 15px 0;
+            overflow-y: auto;
+            font-size: 16px;
+        }
+        .total-label, .change-label {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        .payment-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .action-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 8px 0;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .action-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .purchases-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:hover {
+            color: black;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h2 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kassen-App</h1>
+    
+    <div class="section">
+        <h2>Produkte</h2>
+        <button class="product-btn" style="background-color: lightcoral;" onclick="addToCart('Rote Wurst')">Rote Wurst (€3.50)</button>
+        <button class="product-btn" style="background-color: yellow;" onclick="addToCart('Alkoholische Getränke')">Alkoholische Getränke (€3.00)</button>
+        <button class="product-btn" style="background-color: green;" onclick="addToCart('Antialkoholische Getränke')">Antialkoholische Getränke (€2.00)</button>
+    </div>
+    
+    <div class="section">
+        <h2>Warenkorb</h2>
+        <div class="cart-display" id="cartText"></div>
+        <div class="total-label" id="totalLabel">Gesamt: €0.00</div>
+    </div>
+    
+    <div class="section">
+        <h2>Zahlung</h2>
+        <input type="text" id="paymentEntry" class="payment-input" placeholder="Betrag eingeben">
+        
+        <h3>Münzen</h3>
+        <div class="button-row">
+            <button class="money-btn" style="background-color: peru;" onclick="addBillToPayment(0.01)">1 Cent</button>
+            <button class="money-btn" style="background-color: peru;" onclick="addBillToPayment(0.02)">2 Cent</button>
+            <button class="money-btn" style="background-color: peru;" onclick="addBillToPayment(0.05)">5 Cent</button>
+            <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.10)">10 Cent</button>
+            <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.20)">20 Cent</button>
+            <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.50)">50 Cent</button>
+        </div>
+        
+        <h3>Scheine</h3>
+        <div class="button-row">
+            <button class="money-btn" style="background-color: gold;" onclick="addBillToPayment(1)">1 Euro</button>
+            <button class="money-btn" style="background-color: silver;" onclick="addBillToPayment(2)">2 Euro</button>
+            <button class="money-btn" style="background-color: lightgreen;" onclick="addBillToPayment(5)">5 Euro</button>
+            <button class="money-btn" style="background-color: lightcoral;" onclick="addBillToPayment(10)">10 Euro</button>
+            <button class="money-btn" style="background-color: lightblue;" onclick="addBillToPayment(20)">20 Euro</button>
+            <button class="money-btn" style="background-color: orange;" onclick="addBillToPayment(50)">50 Euro</button>
+        </div>
+        
+        <button class="action-btn" onclick="calculateChange()">Berechnen</button>
+        <div class="change-label" id="changeLabel">Rückgeld: €0.00</div>
+        <button class="action-btn" id="finalizeBtn" onclick="finalizePayment()" disabled>Zahlung abschließen</button>
+        <button class="action-btn" style="background-color: #f44336;" onclick="clearCart()">Warenkorb löschen</button>
+    </div>
+    
+    <div class="section">
+        <h2>Verwaltung</h2>
+        <button class="action-btn" style="background-color: #2196F3;" onclick="showPurchases()">Vergangene Einkäufe anzeigen</button>
+        <button class="action-btn" style="background-color: #2196F3;" onclick="openCsv()">CSV öffnen</button>
+        <button class="action-btn" style="background-color: #f44336;" onclick="deleteAllData()">Alle Bestellungen löschen</button>
+    </div>
+    
+    <!-- Modal für vergangene Einkäufe -->
+    <div id="purchasesModal" class="purchases-modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closePurchasesModal()">&times;</span>
+            <h2>Vergangene Einkäufe</h2>
+            <pre id="purchasesContent" style="white-space: pre-wrap;"></pre>
+        </div>
+    </div>
+    
+    <script>
+        // Produkte mit Preisen
+        const products = {
+            "Rote Wurst": 3.5,
+            "Alkoholische Getränke": 3.0,
+            "Antialkoholische Getränke": 2.0
+        };
+        
+        // Warenkorb
+        let cart = {};
+        
+        // Dateien (simuliert im localStorage)
+        const TXT_FILE_KEY = "einkaeufe_txt";
+        const CSV_FILE_KEY = "einkaeufe_csv";
+        
+        // Initialisierung der CSV-Datei, falls nicht vorhanden
+        if (!localStorage.getItem(CSV_FILE_KEY)) {
+            localStorage.setItem(CSV_FILE_KEY, "Datum,Produkt,Menge,Einzelpreis,Gesamtpreis\n");
+        }
+        
+        function addToCart(product) {
+            if (cart[product]) {
+                cart[product] += 1;
+            } else {
+                cart[product] = 1;
+            }
+            updateCart();
+        }
+        
+        function updateCart() {
+            const cartText = document.getElementById("cartText");
+            const totalLabel = document.getElementById("totalLabel");
+            
+            cartText.innerHTML = "";
+            let total = 0;
+            
+            for (const [item, quantity] of Object.entries(cart)) {
+                const price = products[item] * quantity;
+                cartText.innerHTML += `${item} x ${quantity} = €${price.toFixed(2)}<br>`;
+                total += price;
+            }
+            
+            totalLabel.textContent = `Gesamt: €${total.toFixed(2)}`;
+        }
+        
+        function savePurchase() {
+            const total = Object.entries(cart).reduce((sum, [item, quantity]) => 
+                sum + products[item] * quantity, 0);
+            
+            const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            
+            // TXT-Datei speichern
+            let txtContent = localStorage.getItem(TXT_FILE_KEY) || "";
+            txtContent += `\n--- Kauf am ${now} ---\n`;
+            
+            for (const [item, quantity] of Object.entries(cart)) {
+                const price = products[item] * quantity;
+                txtContent += `${item} x ${quantity} = €${price.toFixed(2)}\n`;
+            }
+            
+            txtContent += `Gesamt: €${total.toFixed(2)}\n`;
+            localStorage.setItem(TXT_FILE_KEY, txtContent);
+            
+            // CSV-Datei speichern
+            let csvContent = localStorage.getItem(CSV_FILE_KEY) || "Datum,Produkt,Menge,Einzelpreis,Gesamtpreis\n";
+            
+            for (const [item, quantity] of Object.entries(cart)) {
+                const einzelpreis = products[item];
+                const gesamtpreis = einzelpreis * quantity;
+                csvContent += `${now},${item},${quantity},${einzelpreis.toFixed(2)},${gesamtpreis.toFixed(2)}\n`;
+            }
+            
+            localStorage.setItem(CSV_FILE_KEY, csvContent);
+        }
+        
+        function calculateChange() {
+            try {
+                const paymentEntry = document.getElementById("paymentEntry");
+                const changeLabel = document.getElementById("changeLabel");
+                const finalizeBtn = document.getElementById("finalizeBtn");
+                
+                const payment = parseFloat(paymentEntry.value);
+                const total = Object.entries(cart).reduce((sum, [item, quantity]) => 
+                    sum + products[item] * quantity, 0);
+                
+                if (isNaN(payment)) {
+                    alert("Bitte eine gültige Zahl eingeben!");
+                    return;
+                }
+                
+                const change = payment - total;
+                
+                if (change < 0) {
+                    alert("Nicht genug Geld eingegeben!");
+                } else {
+                    changeLabel.textContent = `Rückgeld: €${change.toFixed(2)}`;
+                    savePurchase();
+                    finalizeBtn.disabled = false;
+                }
+            } catch (e) {
+                alert("Fehler: " + e.message);
+            }
+        }
+        
+        function finalizePayment() {
+            clearCart();
+        }
+        
+        function clearCart() {
+            cart = {};
+            document.getElementById("cartText").innerHTML = "";
+            document.getElementById("totalLabel").textContent = "Gesamt: €0.00";
+            document.getElementById("paymentEntry").value = "";
+            document.getElementById("changeLabel").textContent = "Rückgeld: €0.00";
+            document.getElementById("finalizeBtn").disabled = true;
+        }
+        
+        function showPurchases() {
+            const modal = document.getElementById("purchasesModal");
+            const content = document.getElementById("purchasesContent");
+            
+            const txtContent = localStorage.getItem(TXT_FILE_KEY);
+            
+            if (txtContent) {
+                content.textContent = txtContent;
+            } else {
+                content.textContent = "Keine gespeicherten Einkäufe vorhanden.";
+            }
+            
+            modal.style.display = "block";
+        }
+        
+        function closePurchasesModal() {
+            document.getElementById("purchasesModal").style.display = "none";
+        }
+        
+        function openCsv() {
+            const csvContent = localStorage.getItem(CSV_FILE_KEY);
+            
+            if (!csvContent) {
+                alert("Noch keine CSV-Datei vorhanden.");
+                return;
+            }
+            
+            // Im Browser können wir die CSV nicht direkt öffnen, erstellen stattdessen einen Download
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'einkaeufe.csv';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+        }
+        
+        function deleteAllData() {
+            if (confirm("Willst du wirklich alle Bestellungen und CSV-Dateien löschen?")) {
+                localStorage.removeItem(TXT_FILE_KEY);
+                localStorage.setItem(CSV_FILE_KEY, "Datum,Produkt,Menge,Einzelpreis,Gesamtpreis\n");
+                alert("Alle Daten wurden gelöscht.");
+            }
+        }
+        
+        function addBillToPayment(value) {
+            const paymentEntry = document.getElementById("paymentEntry");
+            const currentValue = paymentEntry.value;
+            
+            if (currentValue === "") {
+                paymentEntry.value = value.toFixed(2);
+            } else {
+                const newValue = parseFloat(currentValue) + value;
+                paymentEntry.value = newValue.toFixed(2);
+            }
+        }
+        
+        // Schließen des Modals, wenn außerhalb geklickt wird
+        window.onclick = function(event) {
+            const modal = document.getElementById("purchasesModal");
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+    </script>
+</body>
+</html>

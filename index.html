@@ -39,7 +39,7 @@
         }
         .cart-display {
             width: 100%;
-            height: 200px;
+            height: 150px;
             border: 1px solid #ccc;
             padding: 10px;
             margin: 15px 0;
@@ -137,9 +137,6 @@
         
         <h3>Münzen</h3>
         <div class="button-row">
-            <button class="money-btn" style="background-color: peru;" onclick="addBillToPayment(0.01)">1 Cent</button>
-            <button class="money-btn" style="background-color: peru;" onclick="addBillToPayment(0.02)">2 Cent</button>
-            <button class="money-btn" style="background-color: peru;" onclick="addBillToPayment(0.05)">5 Cent</button>
             <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.10)">10 Cent</button>
             <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.20)">20 Cent</button>
             <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.50)">50 Cent</button>
@@ -153,6 +150,7 @@
             <button class="money-btn" style="background-color: lightcoral;" onclick="addBillToPayment(10)">10 Euro</button>
             <button class="money-btn" style="background-color: lightblue;" onclick="addBillToPayment(20)">20 Euro</button>
             <button class="money-btn" style="background-color: orange;" onclick="addBillToPayment(50)">50 Euro</button>
+            <button class="action-btn" style="background-color: darkgray;" onclick="payExact()">Passend</button>
         </div>
         
         <button class="action-btn" onclick="calculateChange()">Berechnen</button>
@@ -363,6 +361,13 @@
                 paymentEntry.value = newValue.toFixed(2);
             }
         }
+        function payExact() {
+    const paymentEntry = document.getElementById("paymentEntry");
+    const total = Object.entries(cart).reduce((sum, [item, quantity]) =>
+        sum + products[item] * quantity, 0);
+    paymentEntry.value = total.toFixed(2);
+}
+
         
         // Schließen des Modals, wenn außerhalb geklickt wird
         window.onclick = function(event) {

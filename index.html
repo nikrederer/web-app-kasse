@@ -226,11 +226,20 @@
             const total = Object.entries(cart).reduce((sum, [item, quantity]) => 
                 sum + products[item] * quantity, 0);
             
-            const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            const now = new Date();
+            const nowStr = now.toLocaleString('de-DE', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }).replace(',', '');
+
             
             // TXT-Datei speichern
             let txtContent = localStorage.getItem(TXT_FILE_KEY) || "";
-            txtContent += `\n--- Kauf am ${now} ---\n`;
+            txtContent += `\n--- Kauf am ${nowStr} ---\n`;
             
             for (const [item, quantity] of Object.entries(cart)) {
                 const price = products[item] * quantity;
@@ -246,7 +255,7 @@
             for (const [item, quantity] of Object.entries(cart)) {
                 const einzelpreis = products[item];
                 const gesamtpreis = einzelpreis * quantity;
-                csvContent += `${now},${item},${quantity},${einzelpreis.toFixed(2)},${gesamtpreis.toFixed(2)}\n`;
+                csvContent += `${nowStr},${item},${quantity},${einzelpreis.toFixed(2)},${gesamtpreis.toFixed(2)}\n`;
             }
             
             localStorage.setItem(CSV_FILE_KEY, csvContent);

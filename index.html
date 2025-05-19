@@ -134,14 +134,7 @@
     <div class="section">
         <h2>Zahlung</h2>
         <input type="text" id="paymentEntry" class="payment-input" placeholder="Betrag eingeben">
-        
-        <h3>Münzen</h3>
-        <div class="button-row">
-            <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.10)">10 Cent</button>
-            <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.20)">20 Cent</button>
-            <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.50)">50 Cent</button>
-        </div>
-        
+
         <h3>Scheine</h3>
         <div class="button-row">
             <button class="money-btn" style="background-color: gold;" onclick="addBillToPayment(1)">1 Euro</button>
@@ -150,6 +143,14 @@
             <button class="money-btn" style="background-color: lightcoral;" onclick="addBillToPayment(10)">10 Euro</button>
             <button class="money-btn" style="background-color: lightblue;" onclick="addBillToPayment(20)">20 Euro</button>
             <button class="money-btn" style="background-color: orange;" onclick="addBillToPayment(50)">50 Euro</button>
+        
+        <h3>Münzen</h3>
+        <div class="button-row">
+            <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.10)">10 Cent</button>
+            <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.20)">20 Cent</button>
+            <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.50)">50 Cent</button>
+        </div>
+        
         </div>
         <button class="action-btn" style="background-color: pink;" onclick="payExact()">Passend</button>
         <button class="action-btn" onclick="calculateChange()">Berechnen</button>

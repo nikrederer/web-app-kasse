@@ -123,6 +123,9 @@
         <button class="product-btn" style="background-color: lightcoral;" onclick="addToCart('Rote Wurst')">Rote Wurst (€3.50)</button>
         <button class="product-btn" style="background-color: yellow;" onclick="addToCart('Alkoholische Getränke')">Alkoholische Getränke (€3.00)</button>
         <button class="product-btn" style="background-color: green;" onclick="addToCart('Antialkoholische Getränke')">Antialkoholische Getränke (€2.50)</button>
+        <!-- ✅ Neue Produkte -->
+        <button class="product-btn" style="background-color: plum;" onclick="addToCart('Glühwein')">Glühwein (€2.50)</button>
+        <button class="product-btn" style="background-color: lightpink;" onclick="addToCart('Punsch')">Punsch (€2.00)</button>
     </div>
     
     <div class="section">
@@ -143,15 +146,15 @@
             <button class="money-btn" style="background-color: lightcoral;" onclick="addBillToPayment(10)">10 Euro</button>
             <button class="money-btn" style="background-color: lightblue;" onclick="addBillToPayment(20)">20 Euro</button>
             <button class="money-btn" style="background-color: orange;" onclick="addBillToPayment(50)">50 Euro</button>
-        
+        </div>
+
         <h3>Münzen</h3>
         <div class="button-row">
             <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.10)">10 Cent</button>
             <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.20)">20 Cent</button>
             <button class="money-btn" style="background-color: lightyellow;" onclick="addBillToPayment(0.50)">50 Cent</button>
         </div>
-        
-        </div>
+
         <button class="action-btn" style="background-color: pink;" onclick="payExact()">Passend</button>
         <button class="action-btn" onclick="calculateChange()">Berechnen</button>
         <div class="change-label" id="changeLabel">Rückgeld: €0.00</div>
@@ -176,38 +179,31 @@
     </div>
     
     <script>
-        // Produkte mit Preisen
+        // ✅ Produkte mit Preisen – neue Produkte hinzugefügt
         const products = {
             "Rote Wurst": 3.5,
             "Alkoholische Getränke": 3.0,
-            "Antialkoholische Getränke": 2.5
+            "Antialkoholische Getränke": 2.5,
+            "Glühwein": 2.5,
+            "Punsch": 2.0
         };
         
-        // Warenkorb
         let cart = {};
-        
-        // Dateien (simuliert im localStorage)
         const TXT_FILE_KEY = "einkaeufe_txt";
         const CSV_FILE_KEY = "einkaeufe_csv";
         
-        // Initialisierung der CSV-Datei, falls nicht vorhanden
         if (!localStorage.getItem(CSV_FILE_KEY)) {
             localStorage.setItem(CSV_FILE_KEY, "Datum,Produkt,Menge,Einzelpreis,Gesamtpreis\n");
         }
         
         function addToCart(product) {
-            if (cart[product]) {
-                cart[product] += 1;
-            } else {
-                cart[product] = 1;
-            }
+            cart[product] = (cart[product] || 0) + 1;
             updateCart();
         }
         
         function updateCart() {
             const cartText = document.getElementById("cartText");
             const totalLabel = document.getElementById("totalLabel");
-            
             cartText.innerHTML = "";
             let total = 0;
             
@@ -221,76 +217,51 @@
         }
         
         function savePurchase() {
-            const total = Object.entries(cart).reduce((sum, [item, quantity]) => 
-                sum + products[item] * quantity, 0);
-            
+            const total = Object.entries(cart).reduce((sum, [item, quantity]) => sum + products[item] * quantity, 0);
             const now = new Date();
-            const nowStr = now.toLocaleString('de-DE', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            }).replace(',', '');
-
+            const nowStr = now.toLocaleString('de-DE', {year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'}).replace(',', '');
             
-            // TXT-Datei speichern
             let txtContent = localStorage.getItem(TXT_FILE_KEY) || "";
             txtContent += `\n--- Kauf am ${nowStr} ---\n`;
-            
             for (const [item, quantity] of Object.entries(cart)) {
                 const price = products[item] * quantity;
                 txtContent += `${item} x ${quantity} = €${price.toFixed(2)}\n`;
             }
-            
             txtContent += `Gesamt: €${total.toFixed(2)}\n`;
             localStorage.setItem(TXT_FILE_KEY, txtContent);
             
-            // CSV-Datei speichern
             let csvContent = localStorage.getItem(CSV_FILE_KEY) || "Datum,Produkt,Menge,Einzelpreis,Gesamtpreis\n";
-            
             for (const [item, quantity] of Object.entries(cart)) {
                 const einzelpreis = products[item];
                 const gesamtpreis = einzelpreis * quantity;
                 csvContent += `${nowStr},${item},${quantity},${einzelpreis.toFixed(2)},${gesamtpreis.toFixed(2)}\n`;
             }
-            
             localStorage.setItem(CSV_FILE_KEY, csvContent);
         }
         
         function calculateChange() {
-            try {
-                const paymentEntry = document.getElementById("paymentEntry");
-                const changeLabel = document.getElementById("changeLabel");
-                const finalizeBtn = document.getElementById("finalizeBtn");
-                
-                const payment = parseFloat(paymentEntry.value);
-                const total = Object.entries(cart).reduce((sum, [item, quantity]) => 
-                    sum + products[item] * quantity, 0);
-                
-                if (isNaN(payment)) {
-                    alert("Bitte eine gültige Zahl eingeben!");
-                    return;
-                }
-                
-                const change = payment - total;
-                
-                if (change < 0) {
-                    alert("Nicht genug Geld eingegeben!");
-                } else {
-                    changeLabel.textContent = `Rückgeld: €${change.toFixed(2)}`;
-                    savePurchase();
-                    finalizeBtn.disabled = false;
-                }
-            } catch (e) {
-                alert("Fehler: " + e.message);
+            const paymentEntry = document.getElementById("paymentEntry");
+            const changeLabel = document.getElementById("changeLabel");
+            const finalizeBtn = document.getElementById("finalizeBtn");
+            const payment = parseFloat(paymentEntry.value);
+            const total = Object.entries(cart).reduce((sum, [item, quantity]) => sum + products[item] * quantity, 0);
+            
+            if (isNaN(payment)) {
+                alert("Bitte eine gültige Zahl eingeben!");
+                return;
+            }
+            
+            const change = payment - total;
+            if (change < 0) {
+                alert("Nicht genug Geld eingegeben!");
+            } else {
+                changeLabel.textContent = `Rückgeld: €${change.toFixed(2)}`;
+                savePurchase();
+                finalizeBtn.disabled = false;
             }
         }
         
-        function finalizePayment() {
-            clearCart();
-        }
+        function finalizePayment() { clearCart(); }
         
         function clearCart() {
             cart = {};
@@ -304,15 +275,8 @@
         function showPurchases() {
             const modal = document.getElementById("purchasesModal");
             const content = document.getElementById("purchasesContent");
-            
             const txtContent = localStorage.getItem(TXT_FILE_KEY);
-            
-            if (txtContent) {
-                content.textContent = txtContent;
-            } else {
-                content.textContent = "Keine gespeicherten Einkäufe vorhanden.";
-            }
-            
+            content.textContent = txtContent || "Keine gespeicherten Einkäufe vorhanden.";
             modal.style.display = "block";
         }
         
@@ -322,13 +286,10 @@
         
         function openCsv() {
             const csvContent = localStorage.getItem(CSV_FILE_KEY);
-            
             if (!csvContent) {
                 alert("Noch keine CSV-Datei vorhanden.");
                 return;
             }
-            
-            // Im Browser können wir die CSV nicht direkt öffnen, erstellen stattdessen einen Download
             const blob = new Blob([csvContent], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -336,10 +297,7 @@
             a.download = 'einkaeufe.csv';
             document.body.appendChild(a);
             a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }, 0);
+            setTimeout(() => { document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 0);
         }
         
         function deleteAllData() {
@@ -353,28 +311,18 @@
         function addBillToPayment(value) {
             const paymentEntry = document.getElementById("paymentEntry");
             const currentValue = paymentEntry.value;
-            
-            if (currentValue === "") {
-                paymentEntry.value = value.toFixed(2);
-            } else {
-                const newValue = parseFloat(currentValue) + value;
-                paymentEntry.value = newValue.toFixed(2);
-            }
+            paymentEntry.value = currentValue === "" ? value.toFixed(2) : (parseFloat(currentValue) + value).toFixed(2);
         }
-        function payExact() {
-    const paymentEntry = document.getElementById("paymentEntry");
-    const total = Object.entries(cart).reduce((sum, [item, quantity]) =>
-        sum + products[item] * quantity, 0);
-    paymentEntry.value = total.toFixed(2);
-}
-
         
-        // Schließen des Modals, wenn außerhalb geklickt wird
+        function payExact() {
+            const paymentEntry = document.getElementById("paymentEntry");
+            const total = Object.entries(cart).reduce((sum, [item, quantity]) => sum + products[item] * quantity, 0);
+            paymentEntry.value = total.toFixed(2);
+        }
+        
         window.onclick = function(event) {
             const modal = document.getElementById("purchasesModal");
-            if (event.target === modal) {
-                modal.style.display = "none";
-            }
+            if (event.target === modal) modal.style.display = "none";
         };
     </script>
 </body>

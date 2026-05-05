@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kassen-App v2 (mit Cent)</title>
+    <style>
+        body {
+            font-family: 'SegoeHier ist die korrigierte zweite Version. Ich habe die **10ct, 20ct und 50ct Münzen** wieder im Zahlungsbereich hinzugefügt, das Design für die drei Hauptprodukte aber schön groß und übersichtlich gelassen.
+
+```html
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kassen-App v2 (Kompakt)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1 { text-align: center; color: #2c3e50; }
+        
+        .section {
+            background: white;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        h2 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .product-btn {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .product-btn:active { transform: scale(0.95); }
+
+        .cart-display {
+            width: 100%;
+            min-height: 80px;
+            border: 1px solid #ddd;
+            background: #fafafa;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .total-label { font-size: 24px; font-weight: bold; color: #e67e22; }
+
+        .payment-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            margin-bottom: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            text-align: right;
+        }
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .money-btn {
+            flex: 1 1 80px;
+            height: 60px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            margin: 5px 0;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            background-color: #27ae60;
+        }
+        .action-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        .btn-delete { background-color: #e74c3c; }
+        .btn-info { background-color: #3498db; }
+
+        .purchases-modal {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 85%;
+            border-radius: 10px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .close-btn { float: right; font-size: 30px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h1>Kassen-System</h1>
+    
+    <div class="section">
+        <h2>Produkte</h2>
+        <div class="product-grid">
+            <button class="product-btn" style="background-color: #ff9999;" onclick="addToCart('Rote Wurst')">Rote Wurst<br>€3.50</button>
+            <button class="product-btn" style="background-color: #ffff99;" onclick="addToCart('Alkoholische Getränke')">Alkoholische Getränke<br>€3.00</button>
+            <button class="product-btn" style="background-color: #99ff99;" onclick="addToCart('Antialkoholische Getränke')">Softdrinks<br>€2.50</button>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Warenkorb</h2>
+        <div class="cart-display" id="cartText">Warenkorb leer</div>
+        <div class="total-label" id="totalLabel">Gesamt: €0.00</div>
+    </div>
+    
+    <div class="section">
+        <h2>Zahlung</h2>
+        <input type="number" id="paymentEntry" class="payment-input" placeholder="0.00" step="0.01">
+
+        <p><strong>Scheine</strong></p>
+        <div class="button-row">
+            <button class="money-btn" style="background-color: #f1c40f;" onclick="addBillToPayment(1)">1 €</button>
+            <button class="money-btn" style="background-color: #bdc3c7;" onclick="addBillToPayment(2)">2 €</button>
+            <button class="money-btn" style="background-color: #2ecc71;" onclick="addBillToPayment(5)">5 €</button>
+            <button class="money-btn" style="background-color: #e74c3c; color: white;" onclick="addBillToPayment(10)">10 €</button>
+            <button class="money-btn" style="background-color: #3498db; color: white;" onclick="addBillToPayment(20)">20 €</button>
+            <button class="money-btn" style="background-color: #e67e22; color: white;" onclick="addBillToPayment(50)">50 €</button>
+        </div>
+
+        <p><strong>Münzen</strong></p>
+        <div class="button-row">
+            <button class="money-btn" style="background-color: #ffeaa7;" onclick="addBillToPayment(0.10)">10ct</button>
+            <button class="money-btn" style="background-color: #ffeaa7;" onclick="addBillToPayment(0.20)">20ct</button>
+            <button class="money-btn" style="background-color: #ffeaa7;" onclick="addBillToPayment(0.50)">50ct</button>
+        </div>
+
+        <button class="action-btn" style="background-color: #fd79a8;" onclick="payExact()">Passend</button>
+        <button class="action-btn" onclick="calculateChange()">Rückgeld berechnen</button>
+        
+        <div class="total-label" id="changeLabel" style="color: #27ae60; margin: 15px 0;">Rückgeld: €0.00</div>
+        
+        <button class="action-btn" id="finalizeBtn" onclick="finalizePayment()" disabled>Zahlung abschließen</button>
+        <button class="action-btn btn-delete" onclick="clearCart()">Abbrechen / Leeren</button>
+    </div>
+    
+    <div class="section">
+        <h2>Verwaltung</h2>
+        <button class="action-btn btn-info" onclick="showPurchases()">Historie anzeigen</button>
+        <button class="action-btn btn-info" onclick="openCsv()">CSV Export</button>
+        <button class="action-btn btn-delete" onclick="deleteAllData()">Alle Daten löschen</button>
+    </div>
+    
+    <div id="purchasesModal" class="purchases-modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closePurchasesModal()">&times;</span>
+            <h2>Historie</h2>
+            <pre id="purchasesContent" style="white-space: pre-wrap; background: #eee; padding: 10px; font-family: monospace;"></pre>
+        </div>
+    </div>
+    
+    <script>
+        const products = {
+            "Rote Wurst": 3.5,
+            "Alkoholische Getränke": 3.0,
+            "Antialkoholische Getränke": 2.5
+        };
+        
+        let cart = {};
+        const TXT_KEY = "kasse_v2_txt";
+        const CSV_KEY = "kasse_v2_csv";
+        
+        function addToCart(product) {
+            cart[product] = (cart[product] || 0) + 1;
+            updateCart();
+        }
+        
+        function updateCart() {
+            const cartText = document.getElementById("cartText");
+            const totalLabel = document.getElementById("totalLabel");
+            cartText.innerHTML = "";
+            let total = 0;
+            
+            for (const [item, quantity] of Object.entries(cart)) {
+                const price = products[item] * quantity;
+                cartText.innerHTML += `<b>${quantity}x</b> ${item} = ${price.toFixed(2)}€<br>`;
+                total += price;
+            }
+            if (Object.keys(cart).length === 0) cartText.innerHTML = "Warenkorb leer";
+            totalLabel.textContent = `Gesamt: €${total.toFixed(2)}`;
+            document.getElementById("finalizeBtn").disabled = true;
+        }
+        
+        function addBillToPayment(value) {
+            const entry = document.getElementById("paymentEntry");
+            let current = parseFloat(entry.value) || 0;
+            entry.value = (current + value).toFixed(2);
+        }
+        
+        function payExact() {
+            const total = Object.entries(cart).reduce((sum, [item, q]) => sum + q * products[item], 0);
+            if(total > 0) {
+                document.getElementById("paymentEntry").value = total.toFixed(2);
+                calculateChange();
+            }
+        }
+
+        function calculateChange() {
+            const payment = parseFloat(document.getElementById("paymentEntry").value);
+            const total = Object.entries(cart).reduce((sum, [item, q]) => sum + q * products[item], 0);
+            
+            if (isNaN(payment) || total <= 0) return;
+            
+            const change = payment - total;
+            if (change < -0.001) { // Floating point safety
+                alert("Zu wenig Geld!");
+                document.getElementById("finalizeBtn").disabled = true;
+            } else {
+                document.getElementById("changeLabel").textContent = `Rückgeld: €${Math.abs(change).toFixed(2)}`;
+                document.getElementById("finalizeBtn").disabled = false;
+            }
+        }
+        
+        function finalizePayment() {
+            const now = new Date().toLocaleString('de-DE');
+            let total = 0;
+            let txt = localStorage.getItem(TXT_KEY) || "";
+            let csv = localStorage.getItem(CSV_KEY) || "Datum,Produkt,Menge,Preis\n";
+
+            txt += `\n[${now}]\n`;
+            for (const [item, quantity] of Object.entries(cart)) {
+                const g = products[item] * quantity;
+                total += g;
+                txt += `${item}: ${quantity}x (${g.toFixed(2)}€)\n`;
+                csv += `${now},${item},${quantity},${g.toFixed(2)}\n`;
+            }
+            txt += `SUMME: ${total.toFixed(2)}€\n---`;
+            
+            localStorage.setItem(TXT_KEY, txt);
+            localStorage.setItem(CSV_KEY, csv);
+            clearCart();
+            alert("Gespeichert!");
+        }
+        
+        function clearCart() {
+            cart = {};
+            updateCart();
+            document.getElementById("paymentEntry").value = "";
+            document.getElementById("changeLabel").textContent = "Rückgeld: €0.00";
+            document.getElementById("finalizeBtn").disabled = true;
+        }
+        
+        function showPurchases() {
+            document.getElementById("purchasesContent").textContent = localStorage.getItem(TXT_KEY) || "Keine Daten vorhanden.";
+            document.getElementById("purchasesModal").style.display = "block";
+        }
+        
+        function closePurchasesModal() {
+            document.getElementById("purchasesModal").style.display = "none";
+        }
+
+        function openCsv() {
+            const data = localStorage.getItem(CSV_KEY);
+            if(!data) { alert("Keine Daten für CSV."); return; }
+            const blob = new Blob([data], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'kassenexport.csv';
+            a.click();
+        }
+        
+        function deleteAllData() {
+            if (confirm("Wirklich alle gespeicherten Verkäufe löschen?")) {
+                localStorage.removeItem(TXT_KEY);
+                localStorage.removeItem(CSV_KEY);
+                location.reload();
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById("purchasesModal")) closePurchasesModal();
+        }
+    </script>
+</body>
+</html>
